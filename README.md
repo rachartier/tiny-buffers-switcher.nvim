@@ -1,1 +1,1 @@
-# tiny_buffers_switcher
+# tiny-buffers-switcher

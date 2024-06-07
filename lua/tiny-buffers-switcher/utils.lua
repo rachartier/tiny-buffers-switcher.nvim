@@ -166,6 +166,7 @@ M.get_list_buffers = function()
 				filename = M._get_filename(path),
 				filename_color = "Normal",
 				modified = modified,
+				id = id,
 			})
 		end
 	end

@@ -1,6 +1,6 @@
 local M = {}
 
-local utils = require("tiny_buffers_switcher.utils")
+local utils = require("tiny-buffers-switcher.utils")
 
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
@@ -118,7 +118,7 @@ function M.switcher()
 	local telescope_ok = pcall(require, "telescope")
 
 	if not telescope_ok then
-		require("tiny_buffers_switcher.fzf_support").switcher()
+		require("tiny-buffers-switcher.fzf_support").switcher()
 		return
 	end
 
