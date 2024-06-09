@@ -17,11 +17,10 @@ local function get_buf_infos(entry)
 	local pattern = ".+ ([%w_.-]+)%s+([%w/.-]*)"
 	local buf_name, buf_path = entry:match(pattern)
 
-	return buf_name, buf_path .. "/"
+	return buf_name, buf_path
 end
 
 function buffer_previewer:parse_entry(entry_str)
-	-- Assume an arbitrary entry in the format of 'file:line'
 	local buf_name, buf_path = get_buf_infos(entry_str)
 
 	if not buf_path or buf_path == "" then
@@ -29,7 +28,7 @@ function buffer_previewer:parse_entry(entry_str)
 	end
 
 	return {
-		path = buf_path .. buf_name,
+		path = buf_path .. "/" .. buf_name,
 		line = 1,
 		col = 1,
 	}
@@ -43,13 +42,13 @@ function M.switcher()
 
 		for _, buffer in ipairs(buffers) do
 			local buffer_name = vim.fn.fnamemodify(buffer.path, ":t")
-			local buffer_directory = vim.fn.fnamemodify(buffer.path, ":h") .. "/"
+			local buffer_directory = vim.fn.fnamemodify(buffer.path, ":h")
 
 			if buffer_name == "" then
 				buffer_name = "[No Name]"
 			end
 
-			if buffer_directory == "./" then
+			if buffer_directory == "." then
 				buffer_directory = ""
 			end
 

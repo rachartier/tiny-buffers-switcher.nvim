@@ -44,7 +44,11 @@ function M.get_symbol(filename)
 		if filename:match("^term://") then
 			symbol = " "
 		else
-			symbol = " "
+			if vim.fn.isdirectory(filename) then
+				symbol = " "
+			else
+				symbol = " "
+			end
 		end
 	end
 
