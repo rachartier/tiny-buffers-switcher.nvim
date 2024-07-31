@@ -53,7 +53,7 @@ local function create_finders_table()
 end
 
 local function create_picker(opts)
-	return pickers.new(opts, {
+	local picker_opts = {
 		prompt_title = "Navigate to a Buffer",
 		finder = create_finders_table(),
 		sorter = conf.generic_sorter(opts),
@@ -86,7 +86,17 @@ local function create_picker(opts)
 
 			return true
 		end,
-	})
+	}
+
+	if M.has_rg == 1 then
+		picker_opts.find_files = {
+			find_command = { "rg", "--files", "--sortr=modified" },
+		}
+	end
+
+	local picker = pickers.new(opts, picker_opts)
+
+	return picker
 end
 
 function M.setup(opts)
@@ -112,6 +122,7 @@ function M.setup(opts)
 			},
 		})
 	M.picker = create_picker(opts)
+	M.has_rg = vim.fn.executable("rg") == 1
 end
 
 function M.switcher()
