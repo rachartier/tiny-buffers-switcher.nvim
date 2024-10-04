@@ -138,7 +138,9 @@ M.get_list_buffers = function()
 		local id = tonumber(line:match("([0-9]+) "))
 
 		if name then
-			local buf_modified = vim.api.nvim_buf_get_option(id, "modified")
+			local buf_modified = vim.api.nvim_get_option_value("modified", {
+				buf = id,
+			})
 
 			local path = name
 			local formatted_filename = M.format_filename(path, 45)
@@ -168,7 +170,7 @@ M.get_list_buffers = function()
 				status_icon = status_icon,
 				status_color = status_color,
 				filename = M._get_filename(path),
-				filename_color = "Normal",
+				filename_color = "TelescopeSelection",
 				modified = modified,
 				id = id,
 			})

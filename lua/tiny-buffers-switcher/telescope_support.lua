@@ -25,7 +25,7 @@ local make_display = function(entry)
 	return displayer(entry.filename, {
 		{ entry.icon, entry.icon_color },
 		{ entry.status_icon, entry.status_color },
-		{ entry.filename, entry.filename_color },
+		{ entry.filename },
 		{ entry.formatted_path, entry.path_color },
 	})
 end
@@ -43,7 +43,6 @@ local function create_finders_table()
 				path = entry.path,
 				icon = entry.icon,
 				filename = entry.filename,
-				filename_color = entry.filename_color,
 				status_icon = entry.status_icon,
 				status_color = entry.status_color,
 				display = make_display,
