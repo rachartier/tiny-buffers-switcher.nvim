@@ -124,6 +124,12 @@ M.get_list_buffers = function()
 
 	local buf_names = vim.split(buffer_list, "\n")
 
+	for i = #buf_names, 1, -1 do
+		if buf_names[i]:match("%[No Name%]") then
+			table.remove(buf_names, i)
+		end
+	end
+
 	table.remove(buf_names, 1)
 
 	if #buf_names >= 2 then
