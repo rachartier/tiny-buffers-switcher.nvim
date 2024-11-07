@@ -30,9 +30,9 @@ local make_display = function(entry)
 	})
 end
 
-local function create_finders_table()
+local function create_finders_table(opts)
 	return finders.new_table({
-		results = utils.get_list_buffers(),
+		results = utils.get_list_buffers(opts),
 		entry_maker = function(entry)
 			return {
 				value = entry,
@@ -51,11 +51,11 @@ local function create_finders_table()
 	})
 end
 
-local function create_picker(opts)
+local function create_picker(telescope_opts, opts)
 	local picker_opts = {
 		prompt_title = "Navigate to a Buffer",
-		finder = create_finders_table(),
-		sorter = conf.generic_sorter(opts),
+		finder = create_finders_table(opts),
+		sorter = conf.generic_sorter(telescope_opts),
 		previewer = require("telescope.config").values.file_previewer({}),
 		attach_mappings = function(prompt_bufnr, map)
 			actions.select_default:replace(function()
@@ -99,32 +99,32 @@ local function create_picker(opts)
 end
 
 function M.setup(opts)
+	M.telescope_opts = require("telescope.themes").get_dropdown({
+		layout_strategy = "horizontal",
+		-- borderchars = "rounded",
+		layout_config = {
+			prompt_position = "top",
+			horizontal = {
+				width = 0.6,
+				height = 0.6,
+				preview_height = 0.6,
+				preview_cutoff = 200,
+			},
+		},
+		set_style = {
+			result = {
+				spacing = 0,
+				indentation = 2,
+				dynamic_width = true,
+			},
+		},
+	})
 	M.opts = opts
-		or require("telescope.themes").get_dropdown({
-			layout_strategy = "horizontal",
-			-- borderchars = "rounded",
-			layout_config = {
-				prompt_position = "top",
-				horizontal = {
-					width = 0.6,
-					height = 0.6,
-					preview_height = 0.6,
-					preview_cutoff = 200,
-				},
-			},
-			set_style = {
-				result = {
-					spacing = 0,
-					indentation = 2,
-					dynamic_width = true,
-				},
-			},
-		})
-	M.picker = create_picker(opts)
+	M.picker = create_picker(M.telescope_opts, M.opts)
 	M.has_rg = vim.fn.executable("rg") == 1
 end
 
-function M.switcher()
+function M.switcher(opts)
 	local telescope_ok = pcall(require, "telescope")
 
 	if not telescope_ok then
@@ -132,7 +132,7 @@ function M.switcher()
 		return
 	end
 
-	create_picker(M.opts):find()
+	create_picker(M.telescope_opts, M.opts):find()
 end
 
 return M

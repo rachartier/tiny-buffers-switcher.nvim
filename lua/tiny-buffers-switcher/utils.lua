@@ -118,7 +118,7 @@ function M._get_filename(fullpath)
 	return fullpath:match("([^/]+)$")
 end
 
-M.get_list_buffers = function()
+M.get_list_buffers = function(opts)
 	local buffer_list = ""
 	buffer_list = vim.fn.execute("ls t")
 
@@ -159,7 +159,7 @@ M.get_list_buffers = function()
 			if buf_modified then
 				-- path_color = "NeoTreeModified"
 				modified = true
-				status_icon = require("config.icons").signs.file.not_saved
+				status_icon = opts.signs.file.not_saved
 				status_color = "SwitchBufferStatusColor"
 			end
 

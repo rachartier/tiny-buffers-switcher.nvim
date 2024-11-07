@@ -36,7 +36,7 @@ end
 
 function M.setup() end
 
-function M.switcher()
+function M.switcher(opts)
 	fzf_lua.fzf_exec(function(fzf_cb)
 		local buffers = utils.get_list_buffers()
 
