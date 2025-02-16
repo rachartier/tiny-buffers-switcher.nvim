@@ -1,9 +1,6 @@
 local M = {}
 
-local telescope_support = nil
-local fzf_support = nil
-
-local use_fzf_lua = false
+local picker = nil
 
 function M.setup(options)
 	M.opts = {
@@ -18,25 +15,25 @@ function M.setup(options)
 		M.opts = vim.tbl_deep_extend("force", M.opts, options)
 	end
 
-	if M.opts.use_fzf_lua then
-		use_fzf_lua = true
-		fzf_support = require("tiny-buffers-switcher.fzf_support")
-		fzf_support.setup(M.opts.fzf_opts)
+	if pcall(require, "telescope") then
+		picker = require("tiny-buffers-switcher.telescope_support")
+		picker.setup(M.opts)
+	elseif pcall(require, "fzf-lua") then
+		picker = require("tiny-buffers-switcher.fzf_support")
+		picker.setup(M.opts)
+	elseif pcall(require, "snacks") then
+		picker = require("tiny-buffers-switcher.snacks_support")
+		picker.setup(M.opts)
 	else
-		telescope_support = require("tiny-buffers-switcher.telescope_support")
-		telescope_support.setup(M.opts)
+		error("No supported picker found")
 	end
-
-	-- vim.api.nvim_set_hl(0, "SwitchBufferModified", options.hl_modified or { link = "NeoTreeModified" })
-	-- vim.api.nvim_set_hl(0, "SwitchBufferNormal", options.hl_normal or { link = "Normal" })
 end
 
 function M.switcher()
-	if use_fzf_lua then
-		fzf_support.switcher()
-	else
-		telescope_support.switcher(M.opts)
+	if not picker then
+		error("No picker found")
 	end
+	picker.switcher()
 end
 
 return M
