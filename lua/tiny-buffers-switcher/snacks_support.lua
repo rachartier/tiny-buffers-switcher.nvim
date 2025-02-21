@@ -28,6 +28,7 @@ local function create_picker_items()
 
 		table.insert(items, {
 			name = buffer_name,
+			formatted_path = buffer.formatted_path,
 			file = buffer.path,
 			path = buffer_directory,
 			modified = modified,
@@ -56,7 +57,7 @@ function M.switcher()
 			ret[#ret + 1] = { item.status_icon .. " ", item.status_color }
 			ret[#ret + 1] = { item.icon .. " ", item.icon_color }
 			ret[#ret + 1] = { item.name }
-			ret[#ret + 1] = { " " .. item.path, "Comment" }
+			ret[#ret + 1] = { " " .. item.formatted_path, "Comment" }
 			return ret
 		end,
 		confirm = function(picker, item)
