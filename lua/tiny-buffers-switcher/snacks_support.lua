@@ -68,7 +68,7 @@ function M.switcher()
 			local selected = item.file
 
 			if selected ~= "" and selected ~= nil and selected ~= "[No Name]" then
-				vim.cmd("buffer " .. selected)
+				vim.cmd("silent! buffer " .. selected)
 			end
 		end,
 	})
