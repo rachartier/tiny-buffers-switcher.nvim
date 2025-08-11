@@ -16,8 +16,11 @@ end
 local function get_buf_infos(entry)
 	local pattern = ".+ ([%w_.-]+)%s+([%w/.-]*).*$"
 	local buf_name, buf_path = entry:match(pattern)
+	local buf_id = nil
 
-	local buf_id = vim.fn.bufnr(buf_path .. "/" .. buf_name)
+	if buf_name and buf_path then
+		buf_id = vim.fn.bufnr(buf_path .. "/" .. buf_name)
+	end
 
 	return buf_name, buf_path, buf_id
 end
@@ -90,7 +93,15 @@ function M.switcher(opts)
 			["default"] = function(selected)
 				if #selected > 0 then
 					local buf_name, buf_path, buf_id = get_buf_infos(selected[1])
-					vim.cmd("buffer " .. buf_id)
+					if buf_id == nil then
+						if buf_name then
+							vim.cmd("buffer " .. buf_name)
+						else
+							vim.notify("Buffer not found", vim.log.levels.ERROR)
+						end
+					else
+						vim.cmd("buffer " .. buf_id)
+					end
 				end
 			end,
 			["ctrl-d"] = function(selected)
