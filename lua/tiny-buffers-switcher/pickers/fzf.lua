@@ -22,6 +22,10 @@ function M.pick(buffers, config)
 		source = entries,
 		actions = {
 			["default"] = function(selected)
+				if #selected == 0 then
+					return
+				end
+
 				vim.api.nvim_set_current_buf(selected[1].buf)
 			end,
 		},

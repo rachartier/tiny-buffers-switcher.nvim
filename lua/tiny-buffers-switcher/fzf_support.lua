@@ -14,14 +14,16 @@ function buffer_previewer:new(o, opts, fzf_win)
 end
 
 local function get_buf_infos(entry)
-	local pattern = ".+ ([%w_.-]+)%s+([%w/.-]*)"
+	local pattern = ".+ ([%w_.-]+)%s+([%w/.-]*).*$"
 	local buf_name, buf_path = entry:match(pattern)
 
-	return buf_name, buf_path
+	local buf_id = vim.fn.bufnr(buf_path .. "/" .. buf_name)
+
+	return buf_name, buf_path, buf_id
 end
 
 function buffer_previewer:parse_entry(entry_str)
-	local buf_name, buf_path = get_buf_infos(entry_str)
+	local buf_name, buf_path, buf_id = get_buf_infos(entry_str)
 
 	if not buf_path or buf_path == "" then
 		buf_path = "."
@@ -87,14 +89,14 @@ function M.switcher(opts)
 		actions = {
 			["default"] = function(selected)
 				if #selected > 0 then
-					local buf_name, buf_path = get_buf_infos(selected[1])
-					vim.cmd("buffer " .. buf_name)
+					local buf_name, buf_path, buf_id = get_buf_infos(selected[1])
+					vim.cmd("buffer " .. buf_id)
 				end
 			end,
 			["ctrl-d"] = function(selected)
 				if #selected > 0 then
-					local buf = selected[1]:match("%s+(.*)")
-					vim.cmd("bdelete " .. buf[1])
+					local buf_name, buf_path, buf_id = get_buf_infos(selected[1])
+					vim.cmd("bdelete " .. buf_id)
 				end
 			end,
 		},
