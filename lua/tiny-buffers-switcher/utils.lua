@@ -111,7 +111,6 @@ function M.format_filename(filename, filename_max_length)
 	end
 
 	return ""
-	-- return filename
 end
 
 function M._get_filename(fullpath)
@@ -144,9 +143,7 @@ M.get_list_buffers = function(opts)
 		local id = tonumber(line:match("([0-9]+) "))
 
 		if name then
-			local buf_modified = vim.api.nvim_get_option_value("modified", {
-				buf = id,
-			})
+			local buf_modified = vim.api.nvim_buf_get_option(id, "modified")
 
 			local path = name
 			local formatted_filename = M.format_filename(path, 45)
@@ -157,7 +154,6 @@ M.get_list_buffers = function(opts)
 			local modified = false
 
 			if buf_modified then
-				-- path_color = "NeoTreeModified"
 				modified = true
 				status_icon = opts.signs.file.not_saved
 				status_color = "SwitchBufferStatusColor"

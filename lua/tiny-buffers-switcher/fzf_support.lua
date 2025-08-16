@@ -86,7 +86,7 @@ function M.switcher(opts)
 		winopts = {
 			width = 0.6,
 			height = 0.6,
-			row = 0.5, -- window row position (0=top, 1=bottom)
+			row = 0.5,
 			col = 0.5,
 		},
 		actions = {
@@ -113,5 +113,3 @@ function M.switcher(opts)
 		},
 	})
 end
-
-return M
