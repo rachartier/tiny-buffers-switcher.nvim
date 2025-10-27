@@ -75,6 +75,7 @@ function M.new(base_picker)
 		vim.bo[buffer_state.buf].buftype = "nofile"
 		vim.bo[buffer_state.buf].filetype = "tiny-buffer-picker"
 		vim.bo[buffer_state.buf].swapfile = false
+		vim.bo[buffer_state.buf].modifiable = false
 
 		vim.api.nvim_buf_set_name(buffer_state.buf, "buffer://picker")
 
@@ -253,26 +254,26 @@ function M.new(base_picker)
 		local current_line = vim.api.nvim_win_get_cursor(buffer_state.win)[1]
 		local total_lines = #buffer_state.buffers
 		local new_line = current_line + 1
-		
+
 		-- Wrap to top if at bottom
 		if new_line > total_lines then
 			new_line = 1
 		end
-		
-		vim.api.nvim_win_set_cursor(buffer_state.win, {new_line, 0})
+
+		vim.api.nvim_win_set_cursor(buffer_state.win, { new_line, 0 })
 	end
 
 	function buffer_picker:_move_cursor_up()
 		local current_line = vim.api.nvim_win_get_cursor(buffer_state.win)[1]
 		local total_lines = #buffer_state.buffers
 		local new_line = current_line - 1
-		
+
 		-- Wrap to bottom if at top
 		if new_line < 1 then
 			new_line = total_lines
 		end
-		
-		vim.api.nvim_win_set_cursor(buffer_state.win, {new_line, 0})
+
+		vim.api.nvim_win_set_cursor(buffer_state.win, { new_line, 0 })
 	end
 
 	function buffer_picker:_select_buffer_by_index(index)
