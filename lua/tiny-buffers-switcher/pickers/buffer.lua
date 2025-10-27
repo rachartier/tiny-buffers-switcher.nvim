@@ -75,7 +75,6 @@ function M.new(base_picker)
 		vim.bo[buffer_state.buf].buftype = "nofile"
 		vim.bo[buffer_state.buf].filetype = "tiny-buffer-picker"
 		vim.bo[buffer_state.buf].swapfile = false
-		vim.bo[buffer_state.buf].modifiable = false
 
 		vim.api.nvim_buf_set_name(buffer_state.buf, "buffer://picker")
 
@@ -104,6 +103,8 @@ function M.new(base_picker)
 	function buffer_picker:_populate_buffer_content()
 		local lines = {}
 		local ns_id = vim.api.nvim_create_namespace("tiny-buffer-picker")
+
+		vim.bo[buffer_state.buf].modifiable = true
 
 		vim.api.nvim_buf_set_lines(buffer_state.buf, 0, -1, false, {})
 		vim.api.nvim_buf_clear_namespace(buffer_state.buf, ns_id, 0, -1)
@@ -197,6 +198,8 @@ function M.new(base_picker)
 				})
 			end
 		end
+
+		vim.bo[buffer_state.buf].modifiable = false
 	end
 
 	function buffer_picker:_setup_buffer_keymaps()
