@@ -2,6 +2,16 @@ local M = {}
 
 local utils = require("tiny-buffers-switcher.utils")
 
+local cycle_state = {
+	active = false,
+	indicator_open = false,
+	index = 0,
+	buffers = {},
+	timer = nil,
+	win = nil,
+	buf = nil,
+}
+
 local buffer_state = {
 	last_buffer = nil,
 	current_buffer = nil,
@@ -93,6 +103,114 @@ function M.new()
 			end
 		end
 		return false
+	end
+
+	local function cycle_build_entries(buffers, index)
+		local entries = {}
+		local max_len = 0
+		for i, buf in ipairs(buffers) do
+			local name = buf.filename or "[No Name]"
+			local prefix = i == index and "> " or "  "
+			table.insert(entries, prefix .. name)
+			max_len = math.max(max_len, vim.fn.strdisplaywidth(name) + 2)
+		end
+		return entries, max_len
+	end
+
+	-- Default indicator: minimal floating window. Overridden by buffer.lua.
+	function picker:_cycle_show_indicator(buffers, index)
+		cycle_state.buf = vim.api.nvim_create_buf(false, true)
+
+		local entries, max_len = cycle_build_entries(buffers, index)
+		vim.api.nvim_buf_set_lines(cycle_state.buf, 0, -1, false, entries)
+
+		local height = #entries
+		local width = math.max(max_len + 2, 20)
+		cycle_state.win = vim.api.nvim_open_win(cycle_state.buf, false, {
+			relative = "editor",
+			row = math.floor((vim.o.lines - height) / 2),
+			col = math.floor((vim.o.columns - width) / 2),
+			width = width,
+			height = height,
+			style = "minimal",
+			border = "rounded",
+			focusable = false,
+			zindex = 250,
+		})
+	end
+
+	function picker:_cycle_move_cursor(index)
+		if cycle_state.win and vim.api.nvim_win_is_valid(cycle_state.win) then
+			local entries = cycle_build_entries(cycle_state.buffers, index)
+			vim.api.nvim_buf_set_lines(cycle_state.buf, 0, -1, false, entries)
+		end
+	end
+
+	-- Only closes the visual window; state reset is handled by _cycle_advance's timer.
+	-- Override this in subpickers to use their own close logic.
+	function picker:_cycle_close_indicator()
+		if cycle_state.win and vim.api.nvim_win_is_valid(cycle_state.win) then
+			vim.api.nvim_win_close(cycle_state.win, true)
+		end
+		cycle_state.win = nil
+		if cycle_state.buf and vim.api.nvim_buf_is_valid(cycle_state.buf) then
+			vim.api.nvim_buf_delete(cycle_state.buf, { force = true })
+		end
+		cycle_state.buf = nil
+	end
+
+	function picker:_cycle_advance(direction)
+		if not cycle_state.active then
+			self:_update_buffers_list()
+			local cur = vim.api.nvim_get_current_buf()
+			cycle_state.buffers = {}
+			for _, b in ipairs(buffer_state.buffers_list) do
+				if b.id ~= cur then
+					table.insert(cycle_state.buffers, b)
+				end
+			end
+			if #cycle_state.buffers == 0 then
+				return
+			end
+			cycle_state.active = true
+			cycle_state.index = 0
+		end
+
+		cycle_state.index = ((cycle_state.index - 1 + direction) % #cycle_state.buffers) + 1
+
+		if not cycle_state.indicator_open then
+			self:_cycle_show_indicator(cycle_state.buffers, cycle_state.index)
+			cycle_state.indicator_open = true
+		else
+			self:_cycle_move_cursor(cycle_state.index)
+		end
+
+		if cycle_state.timer then
+			cycle_state.timer:stop()
+			cycle_state.timer:close()
+		end
+		local hold_time = (self.opts and self.opts.cycle and self.opts.cycle.hold_time) or 300
+		cycle_state.timer = (vim.uv or vim.loop).new_timer()
+		cycle_state.timer:start(hold_time, 0, vim.schedule_wrap(function()
+			local target = cycle_state.buffers[cycle_state.index]
+			if target and vim.api.nvim_buf_is_valid(target.id) then
+				self:switch_to_buffer(target.id)
+			end
+			self:_cycle_close_indicator()
+			cycle_state.active = false
+			cycle_state.indicator_open = false
+			cycle_state.index = 0
+			cycle_state.buffers = {}
+			cycle_state.timer = nil
+		end))
+	end
+
+	function picker:cycle_next()
+		self:_cycle_advance(1)
+	end
+
+	function picker:cycle_prev()
+		self:_cycle_advance(-1)
 	end
 
 	function picker:next_buffer()

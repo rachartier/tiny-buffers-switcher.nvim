@@ -21,6 +21,9 @@ function M.setup(options)
 		telescope_opts = {},
 		fzf_opts = {},
 		snacks_opts = {},
+		cycle = {
+			hold_time = 300,
+		},
 	}
 
 	if options then
@@ -55,6 +58,20 @@ function M.alternate_buffer()
 	end
 
 	return picker_instance:handle_tab()
+end
+
+function M.cycle_next()
+	if not picker_instance then
+		error("Plugin not initialized. Call setup() first.")
+	end
+	picker_instance:cycle_next()
+end
+
+function M.cycle_prev()
+	if not picker_instance then
+		error("Plugin not initialized. Call setup() first.")
+	end
+	picker_instance:cycle_prev()
 end
 
 function M.buffer_picker()

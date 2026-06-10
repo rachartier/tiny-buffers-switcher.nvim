@@ -380,6 +380,70 @@ function M.new(base_picker)
 		}
 	end
 
+	function buffer_picker:_create_cycle_window()
+		local dims = self:calculate_dimensions()
+		local width = dims.width
+		local height = dims.height
+		local row = math.floor((vim.o.lines - height) / 2)
+		local col = math.floor((vim.o.columns - width) / 2)
+
+		buffer_state.buf = vim.api.nvim_create_buf(false, false)
+
+		vim.bo[buffer_state.buf].buftype = "nofile"
+		vim.bo[buffer_state.buf].filetype = "tiny-buffer-picker"
+		vim.bo[buffer_state.buf].swapfile = false
+
+		buffer_state.win = vim.api.nvim_open_win(buffer_state.buf, false, {
+			relative = "editor",
+			width = width,
+			height = height,
+			row = row,
+			col = col,
+			style = "minimal",
+			border = "rounded",
+			title = " Buffer Switcher ",
+			title_pos = "center",
+			focusable = false,
+		})
+
+		vim.wo[buffer_state.win].wrap = false
+		vim.wo[buffer_state.win].signcolumn = "no"
+		vim.wo[buffer_state.win].cursorcolumn = false
+		vim.wo[buffer_state.win].foldcolumn = "0"
+		vim.wo[buffer_state.win].spell = false
+		vim.wo[buffer_state.win].list = false
+		vim.wo[buffer_state.win].conceallevel = 3
+		vim.wo[buffer_state.win].concealcursor = "nvic"
+	end
+
+	function buffer_picker:_cycle_mark_line(index)
+		vim.bo[buffer_state.buf].modifiable = true
+		local count = vim.api.nvim_buf_line_count(buffer_state.buf)
+		for i = 1, count do
+			local char = i == index and ">" or " "
+			vim.api.nvim_buf_set_text(buffer_state.buf, i - 1, 0, i - 1, 1, { char })
+		end
+		vim.bo[buffer_state.buf].modifiable = false
+	end
+
+	function buffer_picker:_cycle_show_indicator(buffers, index)
+		buffer_state.buffers = buffers
+		self:_generate_hotkeys()
+		self:_create_cycle_window()
+		self:_populate_buffer_content()
+		self:_cycle_mark_line(index)
+	end
+
+	function buffer_picker:_cycle_move_cursor(index)
+		if buffer_state.win and vim.api.nvim_win_is_valid(buffer_state.win) then
+			self:_cycle_mark_line(index)
+		end
+	end
+
+	function buffer_picker:_cycle_close_indicator()
+		self:_close()
+	end
+
 	return buffer_picker
 end
 
